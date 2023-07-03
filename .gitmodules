@@ -1,0 +1,3 @@
+[submodule "hw_src/STANN"]
+	path = hw_src/STANN
+	url = git@github.com:ce-uos/STANN.git
