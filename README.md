@@ -1,4 +1,4 @@
-# stann-example
+# Example Project for STANN
 
 This repository contains the LeNet and TenNet examples for the STANN library. 
 
@@ -32,6 +32,13 @@ After sourcing the setup files for Xilinx XRT, build the software application:
     cd build
     cmake ../..
     make
+
+## C Simulation
+
+If you want to run the C testbench for debugging, use the following commands:
+
+    cd hw_src
+    make tb
 
 ## Citation
 
