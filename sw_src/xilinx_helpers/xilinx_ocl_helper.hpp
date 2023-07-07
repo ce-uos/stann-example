@@ -66,8 +66,8 @@ public:
     cl::Kernel get_kernel(std::string kernel_name);
     cl::Buffer create_buffer(size_t size, cl_mem_flags flags);
     cl::Buffer create_buffer_in_bank(int bank, size_t size, cl_mem_flags flags);
-    int get_fd_for_buffer(cl::Buffer buf);
-    cl::Buffer get_buffer_from_fd(int fd);
+    //int get_fd_for_buffer(cl::Buffer buf);
+    //cl::Buffer get_buffer_from_fd(int fd);
     const cl::Context &get_context();
 };
 } // namespace example_utils

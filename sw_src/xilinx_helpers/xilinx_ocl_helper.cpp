@@ -127,19 +127,19 @@ cl::Buffer XilinxOclHelper::create_buffer_in_bank(int bank, size_t size, cl_mem_
     return buf;
 }
 
-int XilinxOclHelper::get_fd_for_buffer(cl::Buffer buf)
-{
-    int fd;
-    xclGetMemObjectFd(buf(), &fd);
-    return fd;
-}
-
-cl::Buffer XilinxOclHelper::get_buffer_from_fd(int fd)
-{
-    cl::Buffer buffer;
-    xclGetMemObjectFromFd(context(), device(), 0, fd, &buffer());
-    return buffer;
-}
+//int XilinxOclHelper::get_fd_for_buffer(cl::Buffer buf)
+//{
+//    int fd;
+//    xclGetMemObjectFd(buf(), &fd);
+//    return fd;
+//}
+//
+//cl::Buffer XilinxOclHelper::get_buffer_from_fd(int fd)
+//{
+//    cl::Buffer buffer;
+//    xclGetMemObjectFromFd(context(), device(), 0, fd, &buffer());
+//    return buffer;
+//}
 
 const cl::Context &XilinxOclHelper::get_context()
 {

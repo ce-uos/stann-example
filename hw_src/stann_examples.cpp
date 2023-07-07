@@ -1,3 +1,5 @@
+#include "stann_examples.hpp"
+
 #include "ap_int.h"
 
 #include "STANN/stann.hpp"
@@ -46,34 +48,41 @@ namespace LeNet {
 
 void forward(stann_value_t *input, LeNetParams &params, stann_value_t *output, int reps) {
 #pragma HLS dataflow
-    hls::stream<float> input_stream;
-    hls::stream<float> conv1_out;
-    hls::stream<float> pool1_out;
-    hls::stream<float> conv2_out;
-    hls::stream<float> pool2_out;
-    hls::stream<float> dense1_out;
-    hls::stream<float> dense2_out;
-    hls::stream<float> dense3_out;
+    hls::stream<float> input_stream("input stream");
+    hls::stream<float> conv1_out("conv1 out stream");
+    hls::stream<float> pool1_out("pool1 out stream");
+    hls::stream<float> conv2_out("conv2 out stream");
+    hls::stream<float> pool2_out("pool2 out stream");
+    hls::stream<float> dense1_out("dense1 out stream");
+    hls::stream<float> dense2_out("dense2 out stream");
+    hls::stream<float> dense3_out("dense3 out stream");
+
+    hls::stream<float> dbg("dbg stream");
+    float conv1_out_copy[28*28*6];
 
     StreamUtil::tostream<32*32>(input, input_stream, reps);
 
     // The following lines could be used for a kn2row implementation:
-    //
     // ConvLayer::kn2row::Float::forward<32,32,1,6,5,2,1,8>(input_stream, params.weights_l1, params.biases_l1, conv1_out, LEAKY_RELU, reps);
     // PoolingLayer::average_stream<28,28,6,2>(conv1_out, pool1_out, reps);
     // ConvLayer::kn2row::Float::forward<14,14,6,16,5,2,8,4>(pool1_out, params.weights_l2, params.biases_l2, conv2_out, LEAKY_RELU, reps);
     // PoolingLayer::average_stream<10,10,16,2>(conv2_out, pool2_out, reps);
 
-    // The following lines are for the im2row implementation. Remove if the
-    // kn2row implementation should be used.
-    ConvLayer::im2row::Float::forward<32,32,1,6,5,1,5,4>(input_stream, params.weights_l1, params.biases_l1, conv1_out, LEAKY_RELU, reps);
+    // The following lines are for the im2row implementation. 
+    ConvLayer::im2row::Float::forward<32,32,1,6,5,1,1,1>(input_stream, params.weights_l1, params.biases_l1, conv1_out, LEAKY_RELU, reps);
     PoolingLayer::average_stream<28,28,6,2>(conv1_out, pool1_out, reps);
-    ConvLayer::im2row::Float::forward<14,14,6,16,5,1,5,4>(pool1_out, params.weights_l2, params.biases_l2, conv2_out, LEAKY_RELU, reps);
+    ConvLayer::im2row::Float::forward<14,14,6,16,5,1,1,1>(pool1_out, params.weights_l2, params.biases_l2, conv2_out, LEAKY_RELU, reps);
     PoolingLayer::average_stream<10,10,16,2>(conv2_out, pool2_out, reps);
 
-    DenseLayerStream::Float::forward<400,120,8,8,1>(pool2_out, params.weights_l3, params.biases_l3, dense1_out, LEAKY_RELU, reps);
-    DenseLayerStream::Float::forward<120,84,4,4,1>(dense1_out, params.weights_l4, params.biases_l4, dense2_out, LEAKY_RELU, reps);
-    DenseLayerStream::Float::forward<84,10,2,2,1>(dense2_out, params.weights_l5, params.biases_l5, dense3_out, NONE, reps);
+    // The following lines are for the direct convolution implementation.
+    // ConvLayer::Direct::Float::forward_stream<32,32,1,6,5,1,1,1,1>(input_stream, params.weights_l1, params.biases_l1, conv1_out, LEAKY_RELU);
+    // PoolingLayer::average_stream<28,28,6,2,float>(conv1_out, pool1_out, reps);
+    // ConvLayer::Direct::Float::forward_stream<14,14,6,16,5,1,1,1,1>(pool1_out, params.weights_l2, params.biases_l2, conv2_out, LEAKY_RELU);
+    // PoolingLayer::average_stream<10,10,16,2,float>(conv2_out, pool2_out, reps);
+
+    DenseLayerStream::Float::forward<400,120,1,1,1>(pool2_out, params.weights_l3, params.biases_l3, dense1_out, LEAKY_RELU, reps);
+    DenseLayerStream::Float::forward<120,84,1,1,1>(dense1_out, params.weights_l4, params.biases_l4, dense2_out, LEAKY_RELU, reps);
+    DenseLayerStream::Float::forward<84,10,1,1,1>(dense2_out, params.weights_l5, params.biases_l5, dense3_out, NONE, reps);
 
     StreamUtil::toarray<10>(dense3_out, output, reps);
 
@@ -411,43 +420,43 @@ extern "C" {
             // read weights
             for (int i = 0; i < 150; i++) {
             #pragma HLS pipeline II=3
-                params.weights_l1[i] = axi_params[i];
+                params.weights_l1[i] = *reinterpret_cast<float*>(&axi_params[i]);
             }
             for (int i = 0; i < 2400; i++) {
             #pragma HLS pipeline II=3
-                params.weights_l2[i] = axi_params[150+i];
+                params.weights_l2[i] = *reinterpret_cast<float*>(&axi_params[150+i]);
             }
             for (int i = 0; i < 48000; i++) {
             #pragma HLS pipeline II=3
-                params.weights_l3[i] = axi_params[2550+i];
+                params.weights_l3[i] = *reinterpret_cast<float*>(&axi_params[2550+i]);
             }
             for (int i = 0; i < 10080; i++) {
             #pragma HLS pipeline II=3
-                params.weights_l4[i] = axi_params[50550+i];
+                params.weights_l4[i] = *reinterpret_cast<float*>(&axi_params[50550+i]);
             }
             for (int i = 0; i < 840; i++) {
             #pragma HLS pipeline II=3
-                params.weights_l5[i] = axi_params[60630+i];
+                params.weights_l5[i] = *reinterpret_cast<float*>(&axi_params[60630+i]);
             }
             for (int i = 0; i < 6; i++) {
             #pragma HLS pipeline II=3
-                params.biases_l1[i] = axi_params[61470+i];
+                params.biases_l1[i] = *reinterpret_cast<float*>(&axi_params[61470+i]);
             }
             for (int i = 0; i < 16; i++) {
             #pragma HLS pipeline II=3
-                params.biases_l2[i] = axi_params[61470+6+i];
+                params.biases_l2[i] = *reinterpret_cast<float*>(&axi_params[61470+6+i]);
             }
             for (int i = 0; i < 120; i++) {
             #pragma HLS pipeline II=3
-                params.biases_l3[i] = axi_params[61470+22+i];
+                params.biases_l3[i] = *reinterpret_cast<float*>(&axi_params[61470+22+i]);
             }
             for (int i = 0; i < 84; i++) {
             #pragma HLS pipeline II=3
-                params.biases_l4[i] = axi_params[61470+142+i];
+                params.biases_l4[i] = *reinterpret_cast<float*>(&axi_params[61470+142+i]);
             }
             for (int i = 0; i < 10; i++) {
             #pragma HLS pipeline II=3
-                params.biases_l5[i] = axi_params[61470+226+i];
+                params.biases_l5[i] = *reinterpret_cast<float*>(&axi_params[61470+226+i]);
             }
         }
 

@@ -34,9 +34,12 @@ TRAINING_XOS = stann_training_tennet.xo
 
 IP_CACHE_DIR ?= ../../../../ip_cache
 
-.phony: clean traces help
+.phony: clean traces help tb
 
 all: stann_inference_lenet.xclbin
+
+tb: 
+	vitis_hls -f testbench/testbench.tcl
 
 kernels: $(LENET_XOS) $(TENNET_XOS) $(TRAINING_XOS)
 
@@ -59,4 +62,4 @@ stann_training_tennet.xo: stann_examples.cpp $(STANN_FILES)
 	v++ --kernel stann_training_tennet $(VPPFLAGS) -c -o $@ $<
 
 clean:
-	$(RM) -r *.xo _x .Xil sd_card *.xclbin *.ltx *.log *.info *compile_summary* vitis_analyzer* *link_summary*
+	$(RM) -r *.xo _x .Xil sd_card *.xclbin *.ltx *.log *.info *compile_summary* vitis_analyzer* *link_summary* stann_examples_tb
