@@ -44,10 +44,18 @@ If you want to run the C testbench for debugging, use the following commands:
 
 If you use this repository, please cite this paper:
 
-    @InProceedings{stann2023,
-        author="Rothmann, Marc and Porrmann, Mario",
-        title="STANN - Synthesis Templates for Artificial Neural Network Inference and Training",
-        booktitle="17th International Work-Conference on Artificial Neural Networks (IWANN2023)",
+    @InProceedings{stann2023_mrothmann,
+        author="Rothmann, Marc
+        and Porrmann, Mario",
+        editor="Rojas, Ignacio
+        and Joya, Gonzalo
+        and Catala, Andreu",
+        title="STANN -- Synthesis Templates for Artificial Neural Network Inference and Training",
+        booktitle="Advances in Computational Intelligence",
         year="2023",
-        publisher="Springer International Publishing"
+        publisher="Springer Nature Switzerland",
+        address="Cham",
+        pages="394--405",
+        abstract="While Deep Learning accelerators have been a research area of high interest, the focus was usually on monolithic accelerators for the inference of large CNNs. Only recently have accelerators for neural network training started to gain more attention. STANN is a template library that enables quick and efficient FPGA-based implementations of neural networks via high-level synthesis. It supports both inference and training to be applicable to domains such as deep reinforcement learning. Its templates are highly configurable and can be composed in different ways to create different hardware architectures.",
+        isbn="978-3-031-43085-5"
     }
